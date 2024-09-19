@@ -1,6 +1,6 @@
-const botToken = '6981236722:AAHA6dWyCXdoDDES2-19CQwlmO8tEuZUex4';
-const sheetId = '14V95WRcUKCoNOXkJFgxCGmBsN-2ZtDNjCC3sLW3O2cE';
-const appUrl = 'https://script.google.com/macros/s/AKfycbzCqoKq-6x2muJaphYnGyugYFXtnOgsZwTSTV2Ay6TPERYGhrUwJ6pEuxtPsMSHQ4DjXw/exec';
+const botToken = 'x';
+const sheetId = 'x';
+const appUrl = 'x';
 
 // Função para configurar o webhook
 function setWebhook() {
