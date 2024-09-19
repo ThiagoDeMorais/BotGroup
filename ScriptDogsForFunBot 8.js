@@ -1,6 +1,6 @@
-const botToken = '7453947587:AAHH4nVW43qxVEu7k4UWfGG1M1Ikz8ZzNxU';
-const sheetId = '1JPHQpt1V0623xcbgTZnP_vol7lPx8CobUiPIJ5hPiJU';
-const appUrl = 'https://script.google.com/macros/s/AKfycbxsXoRayClsoYRwkPidSEb1M0MeaFIdpDVcKKgWltFraacrqLFLjr2qHbdKqdk_SWmEag/exec';
+const botToken = 'x';
+const sheetId = 'x';
+const appUrl = 'x';
 
 // Função para configurar o webhook
 function setWebhook() {
@@ -14,20 +14,18 @@ function doPost(e) {
   const data = JSON.parse(e.postData.contents);
   const message = data.message || data.callback_query.message;
   const chatId = message.chat.id;
-  const sheet = SpreadsheetApp.openById(sheetId).getSheetByName('Página1');
-  
+  const sheet = SpreadsheetApp.openById(sheetId).getSheetByName('Sheet1');
+
   if (data.callback_query) {
     handleCallbackQuery(data.callback_query);
   } else if (data.message.text) {
     const textOfMessage = (data.message.text).split("@", 1)[0];
-    handleCommand(chatId, textOfMessage);
+    handleCommand(data, chatId, textOfMessage);
   }
-
-  sheet.appendRow([new Date(), JSON.stringify(data)]);
 }
 
 // Função para lidar com os comandos
-function handleCommand(chatId, textOfMessage) {
+function handleCommand(data, chatId, textOfMessage) {
   if (textOfMessage == "/start") {
     sendMainMenu(chatId);
   } else {
@@ -35,91 +33,8 @@ function handleCommand(chatId, textOfMessage) {
   }
 }
 
-// Função para enviar o menu principal
-function sendMainMenu(chatId) {
-  const keyboard = {
-    inline_keyboard: [
-      [
-        { text: "1-Controle de Mordida", callback_data: 'menu_controle_mordida' }
-      ],
-      [
-        { text: "2-Latidos e Vocalizações", callback_data: 'menu_latidos_vocalizacoes' }
-      ],
-      [
-        { text: "3-Xixi e cocô no lugar certo", callback_data: 'menu_xixi_coco' }
-      ],
-      [
-        { text: "4 - Sair", callback_data: 'sair' }
-      ]
-    ]
-  };
-
-  sendTextWithKeyboard(chatId, "Menu Principal:", keyboard);
-}
-
-// Função para lidar com as callback queries
-function handleCallbackQuery(callbackQuery) {
-  const chatId = callbackQuery.message.chat.id;
-  const data = callbackQuery.data;
-
-  if (data.startsWith('menu_')) {
-    handleSubMenu(chatId, data);
-  } else if (data === 'sair') {
-    sendText(chatId, "Saindo do menu.");
-  } else {
-    handleSelection(chatId, data);
-  }
-}
-
-// Função para lidar com os submenus
-function handleSubMenu(chatId, data) {
-  let keyboard, messageText;
-
-  switch (data) {
-    case 'menu_controle_mordida':
-      messageText = "Controle de Mordida:";
-      keyboard = {
-        inline_keyboard: [
-          [{ text: "a - controle1", callback_data: 'controle1' }],
-          [{ text: "b - controle2", callback_data: 'controle2' }],
-          [{ text: "c - sair", callback_data: 'sair' }]
-        ]
-      };
-      break;
-
-    case 'menu_latidos_vocalizacoes':
-      messageText = "Latidos e Vocalizações:";
-      keyboard = {
-        inline_keyboard: [
-          [{ text: "a - latido1", callback_data: 'latido1' }],
-          [{ text: "b - latido2", callback_data: 'latido2' }],
-          [{ text: "c - sair", callback_data: 'sair' }]
-        ]
-      };
-      break;
-
-    case 'menu_xixi_coco':
-      messageText = "Xixi e cocô no lugar certo:";
-      keyboard = {
-        inline_keyboard: [
-          [{ text: "a - xixi1", callback_data: 'xixi1' }],
-          [{ text: "b - xixi2", callback_data: 'xixi2' }],
-          [{ text: "c - sair", callback_data: 'sair' }]
-        ]
-      };
-      break;
-
-    default:
-      messageText = "Escolha inválida.";
-      keyboard = { inline_keyboard: [] };
-      break;
-  }
-
-  sendTextWithKeyboard(chatId, messageText, keyboard);
-}
-
-// Função para enviar uma mensagem de texto com teclado inline
-function sendTextWithKeyboard(chatId, text, keyboard) {
+// Função para enviar uma mensagem de texto com ou sem teclado inline
+function sendText(chatId, text, keyboard = null) {
   const url = "https://api.telegram.org/bot" + botToken + "/sendMessage";
   const payload = {
     method: "post",
@@ -127,83 +42,25 @@ function sendTextWithKeyboard(chatId, text, keyboard) {
     payload: JSON.stringify({
       chat_id: chatId,
       text: text,
-      reply_markup: keyboard
+      reply_markup: keyboard ? keyboard : {}
     })
   };
   UrlFetchApp.fetch(url, payload);
 }
 
-// Função para enviar uma mensagem de texto
-function sendText(chatId, text) {
-  const url = "https://api.telegram.org/bot" + botToken + "/sendMessage";
+// Função para excluir uma mensagem
+function deleteMessage(chatId, messageId) {
+  const url = `https://api.telegram.org/bot${botToken}/deleteMessage`;
   const payload = {
     method: "post",
     contentType: "application/json",
     payload: JSON.stringify({
       chat_id: chatId,
-      text: text
+      message_id: messageId
     })
   };
   UrlFetchApp.fetch(url, payload);
 }
-
-// Função para enviar um documento
-function sendDocument(chatId, fileId) {
-  const url = "https://api.telegram.org/bot" + botToken + "/sendDocument";
-  const payload = {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify({
-      chat_id: chatId,
-      document: fileId
-    })
-  };
-  UrlFetchApp.fetch(url, payload);
-}
-
-// Função para salvar a ID do arquivo
-function saveFileId(chatId, fileId) {
-  const scriptProperties = PropertiesService.getScriptProperties();
-  scriptProperties.setProperty("file_id_" + chatId, fileId);
-}
-
-// Função para obter a ID do arquivo salvo
-function getFileId(chatId) {
-  const scriptProperties = PropertiesService.getScriptProperties();
-  return scriptProperties.getProperty("file_id_" + chatId);
-}
-
-// Função para lidar com a seleção dos controles
-function handleSelection(chatId, selection) {
-  const sheet = SpreadsheetApp.openById(sheetId).getSheetByName('Página1');
-  const range = sheet.getRange("B8:L9");
-  let response_of_bot;
-
-  if (selection == 'controle1') {
-    const cell = range.getCell(1, 1);
-    response_of_bot = extractLinksFromCell(cell);
-  } else if (selection == 'controle2') {
-    const cell = range.getCell(2, 1);
-    response_of_bot = extractLinksFromCell(cell);
-  } else if (selection == 'latido1') {
-    const cell = range.getCell(1, 2);
-    response_of_bot = extractLinksFromCell(cell);
-  } else if (selection == 'latido2') {
-    const cell = range.getCell(2, 2);
-    response_of_bot = extractLinksFromCell(cell);
-  } else if (selection == 'xixi1') {
-    const cell = range.getCell(1, 3);
-    response_of_bot = extractLinksFromCell(cell);
-  } else if (selection == 'xixi2') {
-    const cell = range.getCell(2, 3);
-    response_of_bot = extractLinksFromCell(cell);
-  } else {
-    response_of_bot = 'Escolha inválida.';
-  }
-
-  sendText(chatId, response_of_bot);
-}
-
 
 
 // Função para extrair múltiplos links e o texto associado de uma célula
@@ -217,9 +74,140 @@ function extractTextAndLinksFromCell(cell) {
     const text = run.getText();
     const url = run.getLinkUrl();
     if (url) {
-      results.push(`Texto: ${text}\nLink: ${url}`);
+      results.push(`${text}\nLink: ${url}`);
+    } else if (text != '') {
+      results.push(`${text}`);
     }
   }
 
-  return results.join('\n\n');
+  return results.join('\n');
 }
+
+// Função para enviar o menu principal
+function sendMainMenu(chatId) {
+  const keyboard = {
+    inline_keyboard: [
+      [{ text: "1-Controle de Mordida", callback_data: 'menu_controle_mordida_1' }, { text: "2-Latidos e Vocalizações", callback_data: 'menu_latidos_vocalizacoes_2' }],
+      [{ text: "Sair", callback_data: 'sair' }]
+    ]
+  };
+  sendText(chatId, "Menu Principal:", keyboard);
+}
+
+//------------------------------------------------------------------------------------------------------------------
+
+
+
+
+// Função para lidar com as callback queries
+function handleCallbackQuery(callbackQuery) {
+  const chatId = callbackQuery.message.chat.id;
+  const messageId = callbackQuery.message.message_id;
+  const data = callbackQuery.data;
+
+  if (data.startsWith('menu_')) {
+    deleteMessage(chatId, messageId);
+    handleSubMenu(chatId, data);
+  } else if (data.startsWith('element_')) {
+    deleteMessage(chatId, messageId);
+    handleElementSelection(chatId, data);
+  } else if (data === 'sair') {
+    deleteMessage(chatId, messageId);
+    sendText(chatId, "Saindo do menu.");
+  } else if (data === 'voltar') {
+    deleteMessage(chatId, messageId);
+    sendMainMenu(chatId);
+  } else {
+    handleSelection(chatId, data);
+  }
+}
+
+// Função para lidar com os submenus
+function handleSubMenu(chatId, data) {
+  let keyboard, messageText;
+
+  // Armazena a seleção do menu
+  const userProperties = PropertiesService.getUserProperties();
+  userProperties.setProperty(chatId + "_menu", data);
+
+  switch (data) {
+    case 'menu_controle_mordida_1':
+      messageText = "Controle de Mordida:";
+      keyboard = {
+        inline_keyboard: [
+          [{ text: "controle1", callback_data: 'controle_2' }, { text: "controle2", callback_data: 'controle_3' }],
+          [{ text: "Voltar", callback_data: 'voltar' }], [{ text: "Sair", callback_data: 'sair' }]
+        ]
+      };
+      break;
+
+    case 'menu_latidos_vocalizacoes_2':
+      messageText = "Latidos e Vocalizações:";
+      keyboard = {
+        inline_keyboard: [
+          [{ text: "latido1", callback_data: 'latido_2' }, { text: "latido2", callback_data: 'latido_3' }],
+          [{ text: "Voltar", callback_data: 'voltar' }], [{ text: "Sair", callback_data: 'sair' }]
+        ]
+      };
+      break;
+    default:
+      messageText = "Escolha inválida.";
+      keyboard = { inline_keyboard: [] };
+      break;
+  }
+
+  sendText(chatId, messageText, keyboard);
+}
+
+
+// Função para lidar com a seleção do submenu
+function handleSelection(chatId, selection) {
+  const sheet = SpreadsheetApp.openById(sheetId).getSheetByName('Sheet1');
+  const userProperties = PropertiesService.getUserProperties();
+
+  // Obtém o menu anterior selecionado
+  const previousMenu = userProperties.getProperty(chatId + "_menu");
+  
+  // Determina a linha e coluna com base na seleção e no menu anterior
+  let row, column;
+  column = parseInt(previousMenu.split('_').pop()); // Pega o número da coluna a partir do menu anterior
+  row = selection.split('_')[1];  // Extrai o número após o '_', que indica a linha
+
+  const cell = sheet.getRange(row, column);
+  const cellValue = cell.getValue();
+  
+  // Divide os elementos da célula separados por vírgula
+  const elements = cellValue.split(';');
+
+  // Se a célula contém mais de um elemento, cria um menu dinâmico
+  if (elements.length > 1) {
+    const keyboard = {
+      inline_keyboard: elements.map((element, index) => [{ text: element.trim(), callback_data: `element_${row}_${column}_${index}` }])
+    };
+    sendText(chatId, "Escolha um elemento:", keyboard);
+  } else {
+    // Se houver apenas um elemento, exibe o resultado diretamente
+    sendText(chatId, `Resultado: ${elements[0]}`);
+  }
+}
+
+// Função para tratar o item selecionado no menu mais profundo
+function handleElementSelection(chatId, selection) {
+  const sheet = SpreadsheetApp.openById(sheetId).getSheetByName('Sheet1');
+  
+  // Extrai a linha, coluna e índice do elemento da seleção
+  const [_, row, column, elementIndex] = selection.split('_');
+  
+
+  // Obtém o valor da célula
+  const cell = sheet.getRange(row, column);
+  const cellValue = cell.getValue();
+  
+  // Divide os elementos e obtém o elemento selecionado
+  const elements = cellValue.split(',');
+  const selectedElement = elements[elementIndex].trim();
+  
+  // Exibe o elemento selecionado e interrompe a recursão
+  sendText(chatId, `Você selecionou: ${selectedElement}`);
+}
+
