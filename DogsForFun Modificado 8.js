@@ -1,6 +1,6 @@
 const botToken = 'x';
 const sheetId = 'x';
-const appUrl = 'https://script.google.com/macros/s/AKfycbx_64Ql3XnZ-y6cp7z7ryfXgj0ZZ9gDVSXIQjtymPpVWnLi_Ev1OnZt-9DIzoblNa7LiA/exec';
+const appUrl = 'x';
 
 // Função para configurar o webhook
 function setWebhook() {
@@ -162,9 +162,9 @@ function handleSubMenu(chatId, data) {
       messageText = "Controle de Mordida:";
       keyboard = {
         inline_keyboard: [
-          [{ text: "MÓDULO: ADESTRAMENTO HACKER | RITUAL DE INICIAÇÃO\nMÓDULO Bônus: Canse seu Cão SEM se Cansar | Exercícios Lúdicos de Estimulação Cognitiva", callback_data: 'controle_2' }, { text: "Autorregulação\nAlimentação Inteligente\nElementos Da Disciplina", callback_data: 'controle_3' }],
-          [{ text: "REGULAÇÃO INTERNA\nMitos sobre Alimentação e Estratégias de Treino", callback_data: 'controle_4' }, { text: "Ciclo Circadiano e Autorregulação\nA Energia Correta Para o Comportamento Esperado", callback_data: 'controle_5' }],
-          [{ text: "R+ R- P+ P- RAIZ QUADRADA DE PI\nConhecendo e Utilizando o Estímulo Discriminativo", callback_data: 'controle_6' }],
+          [{ text: "MÓDULO: ADESTRAMENTO HACKER | RITUAL DE INICIAÇÃO ", callback_data: 'controle_2' }],[{text: "MÓDULO Bônus: Canse seu Cão SEM se Cansar | Exercícios Lúdicos de Estimulação Cognitiva ", callback_data: 'controle_3' }] ,[{ text: "Autorregulação\nAlimentação Inteligente\nElementos Da Disciplina", callback_data: 'controle_4' }],
+          [{ text: "REGULAÇÃO INTERNA\nMitos sobre Alimentação e Estratégias de Treino", callback_data: 'controle_5' }, { text: "Ciclo Circadiano e Autorregulação\nA Energia Correta Para o Comportamento Esperado", callback_data: 'controle_6' }],
+          [{ text: "R+ R- P+ P- RAIZ QUADRADA DE PI\nConhecendo e Utilizando o Estímulo Discriminativo", callback_data: 'controle_7' }],
           [{ text: "Voltar", callback_data: 'voltar' }], [{ text: "Sair", callback_data: 'sair' }]
         ]
       };
@@ -451,7 +451,7 @@ function handleSelection(chatId, selection) {
   const cellValue = cell.getValue();
 
   // Divide os elementos da célula separados por vírgula
-  const elements = cellValue.split(';');
+  const elements = cellValue.split('\n');
 
   // Se a célula contém mais de um elemento, cria um menu dinâmico
   if (elements.length > 0) {
@@ -478,12 +478,13 @@ function handleElementSelection(chatId, selection) {
   const richTextContent = extractTextAndLinksFromCell(cell);
 
   // Divide os elementos extraídos por linha (considerando quebra de linha como separador)
-  const elements = richTextContent.split(';');
+  const elements = richTextContent.split('\n');
 
   // Seleciona o elemento baseado no índice fornecido pela seleção do usuário
   const selectedElement = elements[elementIndex].trim();
 
   // Exibe o elemento selecionado com o texto e os links correspondentes
-  sendText(chatId, `Você selecionou:\n${selectedElement}`);
+  //sendText(chatId, `Você selecionou:\n${selectedElement}`);
+  sendText(chatId, `richTextContent:\n${richTextContent}\n\n elements:\n${elements} \n\n selectedElement:\n${selectedElement}`);
 }
 
